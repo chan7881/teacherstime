@@ -64,7 +64,15 @@
       padding: 18px 0;
     }
     .panel { display: none; }
-    .panel.active { display: block; }
+    .panel.active {
+      display: block;
+      animation: morphIn 0.6s cubic-bezier(.4,2,.3,1);
+    }
+    @keyframes morphIn {
+      0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+      60% { opacity: 1; transform: scale(1.04) translateY(-4px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
     .timer-display {
       font-size: 3em;
       text-align: center;
@@ -74,7 +82,8 @@
       color: #222;
       background: none;
       border-radius: 0;
-      transition: font-size 0.3s, color 0.3s;
+      transition: font-size 0.5s cubic-bezier(.4,2,.3,1), color 0.5s, transform 0.5s cubic-bezier(.4,2,.3,1);
+      will-change: font-size, color, transform;
       word-break: keep-all;
     }
     .input-row {
@@ -111,16 +120,17 @@
       cursor: pointer;
       box-shadow: 0 2px 8px #00bcd422;
       margin: 0 8px;
-      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+      transition: background 0.3s, box-shadow 0.3s, transform 0.5s cubic-bezier(.4,2,.3,1);
+      will-change: background, box-shadow, transform;
     }
     button:hover {
       background: #0097a7;
       box-shadow: 0 4px 16px #00bcd488;
-      transform: translateY(-2px) scale(1.04);
+      transform: translateY(-2px) scale(1.08); 
     }
     button:active {
       background: #00838f;
-      transform: scale(0.98);
+      transform: scale(0.96);
     }
     @media (max-width: 700px) {
       .container {
@@ -139,6 +149,12 @@
         min-width: 90px;
         font-size: 1em;
         padding: 12px 0;
+        transition: color 0.4s, border-bottom 0.4s, font-size 0.4s, padding 0.4s, transform 0.5s cubic-bezier(.4,2,.3,1);
+        will-change: color, border-bottom, font-size, padding, transform;
+      }
+      .tab.active {
+        /* ...기존 스타일... */
+        transform: scale(1.08);
       }
       .timer-display { font-size: 1.3em; margin: 18px 0 24px 0; }
       .input-row { flex-direction: column; gap: 10px; margin-bottom: 18px; }
