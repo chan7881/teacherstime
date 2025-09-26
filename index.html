@@ -265,35 +265,47 @@
       showTimerEndMsg(false);
     };
 
-    // 디데이 기능
+    // 디데이 기능 (리팩터링)
     let ddayTarget = null, ddayInterval;
+    function getDdayDiff(targetDate) {
+      const now = new Date();
+      const diffSec = Math.floor((targetDate - now) / 1000);
+      const d = Math.floor(diffSec / 86400);
+      const h = Math.floor((diffSec % 86400) / 3600);
+      const m = Math.floor((diffSec % 3600) / 60);
+      const s = diffSec % 60;
+      return { diffSec, d, h, m, s };
+    }
+    function setDdayDisplay(countText, remainText) {
+      document.getElementById('ddayCount').textContent = countText;
+      document.getElementById('ddayRemain').textContent = remainText;
+    }
     function updateDdayDisplay() {
-      const ddayCount = document.getElementById('ddayCount');
-      const ddayRemain = document.getElementById('ddayRemain');
       if (!ddayTarget) {
-        ddayCount.textContent = 'D-0';
-        ddayRemain.textContent = '0일 00:00:00';
+        setDdayDisplay('D-0', '0일 00:00:00');
         return;
       }
-      let now = new Date();
-      let diff = Math.floor((ddayTarget - now) / 1000);
-      let d = Math.floor(diff / 86400);
-      let h = Math.floor((diff % 86400) / 3600);
-      let m = Math.floor((diff % 3600) / 60);
-      let s = diff % 60;
-      ddayCount.textContent = `D-${d >= 0 ? d : 0}`;
-      ddayRemain.textContent = `${d >= 0 ? d : 0}일 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      if (diff <= 0) {
+      const { diffSec, d, h, m, s } = getDdayDiff(ddayTarget);
+      if (diffSec >= 0) {
+        // 자정 기준으로 남은 일수 계산
+        const now = new Date();
+        const targetMidnight = new Date(ddayTarget.getFullYear(), ddayTarget.getMonth(), ddayTarget.getDate());
+        const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const dayDiff = Math.floor((targetMidnight - nowMidnight) / 86400000); // 1일=86400000ms
+        if (dayDiff === 0) {
+          setDdayDisplay('D-DAY', `0일 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+        } else {
+          setDdayDisplay(`D-${dayDiff}`, `${d >= 0 ? d : 0}일 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+        }
+      } else {
+        setDdayDisplay('D-0', '0일 00:00:00');
         clearInterval(ddayInterval);
         ddayInterval = null;
-        ddayCount.textContent = 'D-0';
-        ddayRemain.textContent = '0일 00:00:00';
-        alert('디데이 도달!');
       }
     }
     document.getElementById('ddaySet').onclick = function() {
-      let date = document.getElementById('ddayDate').value;
-      let time = document.getElementById('ddayTime').value;
+      const date = document.getElementById('ddayDate').value;
+      const time = document.getElementById('ddayTime').value;
       if (!date || !time) return;
       ddayTarget = new Date(date + 'T' + time);
       updateDdayDisplay();
@@ -304,8 +316,7 @@
       clearInterval(ddayInterval);
       ddayInterval = null;
       ddayTarget = null;
-      document.getElementById('ddayCount').textContent = 'D-0';
-      document.getElementById('ddayRemain').textContent = '0일 00:00:00';
+      setDdayDisplay('D-0', '0일 00:00:00');
       document.getElementById('ddayDate').value = '';
       document.getElementById('ddayTime').value = '';
     };
